@@ -2607,5 +2607,45 @@
   "presets": ["search", "work"],
   "workScopes": ["Sites.Read.All", "Mail.ReadWrite", "Files.ReadWrite", "Calendars.ReadWrite"],
   "llmTip": "Unified Microsoft Search across the whole tenant in one call. POST body: { requests: [ { entityTypes: ['message'|'event'|'driveItem'|'listItem'|'site'|'person'|'chatMessage'], query: { queryString: 'your search text' }, from: 0, size: 25 } ] }. entityTypes must be an array; combine compatible types to search mail, files, events, and people together. Returns hitsContainers with hits. Reference: https://learn.microsoft.com/graph/api/search-query"
+  },
+  {
+  "pathPattern": "/applications",
+  "method": "get",
+  "toolName": "list-applications",
+  "presets": ["apps", "work"],
+  "workScopes": ["Application.ReadWrite.All"],
+  "llmTip": "Lists Entra app registrations. Returns id (the OBJECT id, used by the other app tools), appId (the client id), displayName, signInAudience. Find one by name with $filter=displayName eq 'Exact Name'. Do not confuse id (object id) with appId (client id)."
+  },
+  {
+    "pathPattern": "/applications",
+    "method": "post",
+    "toolName": "create-application",
+    "presets": ["apps", "work"],
+    "workScopes": ["Application.ReadWrite.All"],
+    "llmTip": "Creates a new Entra app registration. Minimal body: { displayName: 'My App' }. Optional: signInAudience ('AzureADMyOrg' = single-tenant, the default), web: { redirectUris: ['https://...'] }. Returns the new app's id (object id) and appId (client id). Follow with add-application-password to give it a secret."
+  },
+  {
+    "pathPattern": "/applications/{application-id}/addPassword",
+    "method": "post",
+    "toolName": "add-application-password",
+    "presets": ["apps", "work"],
+    "workScopes": ["Application.ReadWrite.All"],
+    "llmTip": "Adds a client secret to an app. Path uses the app's OBJECT id (from create-application or list-applications 'id', NOT appId). Body: { passwordCredential: { displayName: 'railway', endDateTime: '2027-01-01T00:00:00Z' } }. Returns secretText, the secret VALUE shown only once, capture it immediately."
+  },
+  {
+    "pathPattern": "/applications/{application-id}",
+    "method": "get",
+    "toolName": "get-application",
+    "presets": ["apps", "work"],
+    "workScopes": ["Application.ReadWrite.All"],
+    "llmTip": "Gets one app registration by OBJECT id. Returns appId, displayName, requiredResourceAccess (its API permissions), web.redirectUris, passwordCredentials (metadata only, never the secret value), signInAudience."
+  },
+  {
+    "pathPattern": "/applications/{application-id}",
+    "method": "delete",
+    "toolName": "delete-application",
+    "presets": ["apps", "work"],
+    "workScopes": ["Application.ReadWrite.All"],
+    "llmTip": "Deletes an app registration by OBJECT id. It goes to the deleted-items bin (recoverable ~30 days). Handy for cleaning up test apps."
   }
 ]
