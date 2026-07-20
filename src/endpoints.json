@@ -2599,5 +2599,13 @@
     "workScopes": ["TeamsActivity.Send"],
     "contentType": "application/json",
     "llmTip": "Sends a Teams activity feed notification to the current user (the badge + entry in their Activity tab). Body: { topic: { source: 'entityUrl' | 'text', value: <Graph URL or plain text>, webUrl: <required when source='text', click-through URL> }, activityType: <must be declared in the calling Teams app's manifest, OR the reserved 'systemDefault' which provides free-form Actor+Reason text>, previewText: { content: 'short preview' }, templateParameters?: [{ name, value }] (substituted into the manifest's localized notification template), teamsAppId?: <optional disambiguator when multiple installed apps share a Microsoft Entra app ID — fetch via list-my-installed-teams-apps>, chainId?, iconId? }. Use to ping the user with 'action required' notifications from agentic workflows. See https://learn.microsoft.com/graph/teams-send-activityfeednotifications."
+  },
+  {
+  "pathPattern": "/search/query",
+  "method": "post",
+  "toolName": "search-tenant",
+  "presets": ["search", "work"],
+  "workScopes": ["Sites.Read.All", "Mail.ReadWrite", "Files.ReadWrite", "Calendars.ReadWrite"],
+  "llmTip": "Unified Microsoft Search across the whole tenant in one call. POST body: { requests: [ { entityTypes: ['message'|'event'|'driveItem'|'listItem'|'site'|'person'|'chatMessage'], query: { queryString: 'your search text' }, from: 0, size: 25 } ] }. entityTypes must be an array; combine compatible types to search mail, files, events, and people together. Returns hitsContainers with hits. Reference: https://learn.microsoft.com/graph/api/search-query"
   }
 ]
