@@ -1,0 +1,26 @@
+name: CI
+
+# The only workflow in this fork, so it is the only one Railway "Wait for CI" waits on.
+# It runs upstream's own `npm run verify` steps on the Node version the Dockerfile deploys.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"   # matches the Dockerfile
+          cache: npm
+      - run: npm ci
+      - run: npm run generate
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run build
+      - run: npm test
+      - name: Startup check (the built server loads its modules)
+        run: node dist/index.js --list-presets
