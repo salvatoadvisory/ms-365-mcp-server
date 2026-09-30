@@ -24,6 +24,7 @@ import { TOOL_CATEGORIES } from './tool-categories.js';
 import { getRequestTokens } from './request-context.js';
 import { parseTeamsUrl } from './lib/teams-url-parser.js';
 import { buildBM25Index, scoreQuery, tokenize, type BM25Index } from './lib/bm25.js';
+import * as steer from './lib/steer.js';
 export interface DiscoverySearchIndex {
   bm25: BM25Index;
   nameTokens: Map<string, Set<string>>;
@@ -1051,6 +1052,16 @@ async function executeGraphTool(
       }
     }
 
+    // Steer file search: scope a search-query to the configured sites, and ask for JSON so
+    // items under an excluded folder can be taken out below. Both come from the environment.
+    const steerRequest = `${path} ${JSON.stringify(params)}`;
+    if (steer.active()) {
+      options.forceJsonOutput = true;
+      if (tool.alias === 'search-query' && typeof options.body === 'string') {
+        options.body = steer.scopeSearch(options.body, steerRequest);
+      }
+    }
+
     const isProbablyMediaContent =
       tool.errors?.some((error) => error.description === 'Retrieved media content') ||
       path.endsWith('/content');
@@ -1207,6 +1218,18 @@ async function executeGraphTool(
         }
       } catch {
         // Non-JSON response
+      }
+    }
+
+    if (steer.active() && response?.content?.[0]?.text) {
+      try {
+        const steered = steer.filterResponse(JSON.parse(response.content[0].text), steerRequest);
+        if (steered.dropped) {
+          logger.info(`Steer: dropped ${steered.dropped} item(s) under excluded paths`);
+        }
+        response.content[0].text = graphClient.serialize(steered.value);
+      } catch {
+        // Not JSON: nothing to steer.
       }
     }
 
