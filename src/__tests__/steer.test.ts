@@ -12,7 +12,9 @@ afterEach(() => {
 describe('steer', () => {
   it('changes nothing when neither setting is set', () => {
     expect(active()).toBe(false);
-    const json = { value: [{ name: 'x', webUrl: 'https://contoso-my.sharepoint.com/Folder A - Private Work/x' }] };
+    const json = {
+      value: [{ name: 'x', webUrl: 'https://contoso-my.sharepoint.com/Folder A - Private Work/x' }],
+    };
     expect(filterResponse(json, '/me/drive').value).toEqual(json);
     expect(scopeSearch('{"requests":[]}', '')).toBe('{"requests":[]}');
   });
@@ -39,7 +41,11 @@ describe('steer', () => {
           hitsContainers: [
             {
               hits: [
-                { resource: { webUrl: 'https://contoso-my.sharepoint.com/Folder A - Private Work/z.pdf' } },
+                {
+                  resource: {
+                    webUrl: 'https://contoso-my.sharepoint.com/Folder A - Private Work/z.pdf',
+                  },
+                },
                 { resource: { webUrl: 'https://contoso.sharepoint.com/sites/Home/y.pdf' } },
               ],
             },
@@ -48,8 +54,8 @@ describe('steer', () => {
       ],
     };
     const out = filterResponse(json, '/search/query');
-    const hitsLeft = (out.value as { value: Array<{ hitsContainers: Array<{ hits: unknown[] }> }> }).value[0]
-      .hitsContainers[0].hits;
+    const hitsLeft = (out.value as { value: Array<{ hitsContainers: Array<{ hits: unknown[] }> }> })
+      .value[0].hitsContainers[0].hits;
     expect(hitsLeft).toHaveLength(1);
   });
 
@@ -57,16 +63,22 @@ describe('steer', () => {
     process.env.MS365_MCP_EXCLUDED_PATHS = EX;
     expect(named('list the files in Folder A - Private Work please')).toBe(true);
     const json = { value: [{ webUrl: 'https://x/Folder A - Private Work/a' }] };
-    expect(filterResponse(json, '/me/drive/root:/Folder A - Private Work:/children').dropped).toBe(0);
+    expect(filterResponse(json, '/me/drive/root:/Folder A - Private Work:/children').dropped).toBe(
+      0
+    );
   });
 
   it('limits a file search to the scope unless OneDrive is asked for', () => {
     process.env.MS365_MCP_SEARCH_SCOPE = SCOPE;
-    const body = JSON.stringify({ requests: [{ entityTypes: ['driveItem'], query: { queryString: 'proposal' } }] });
+    const body = JSON.stringify({
+      requests: [{ entityTypes: ['driveItem'], query: { queryString: 'proposal' } }],
+    });
     const scoped = JSON.parse(scopeSearch(body, 'proposal'));
     expect(scoped.requests[0].query.queryString).toBe(`(proposal) AND (path:"${SCOPE}")`);
     expect(scopeSearch(body, 'proposal in my OneDrive')).toBe(body);
-    const mail = JSON.stringify({ requests: [{ entityTypes: ['message'], query: { queryString: 'proposal' } }] });
+    const mail = JSON.stringify({
+      requests: [{ entityTypes: ['message'], query: { queryString: 'proposal' } }],
+    });
     expect(scopeSearch(mail, 'proposal')).toBe(mail);
   });
 });

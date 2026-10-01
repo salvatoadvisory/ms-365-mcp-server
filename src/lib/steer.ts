@@ -54,7 +54,10 @@ function hits(item: unknown, paths: string[]): boolean {
  * The response with every item under an excluded path taken out of every list in it.
  * Returns the filtered value and how many items were dropped.
  */
-export function filterResponse(json: unknown, requestText: string): { value: unknown; dropped: number } {
+export function filterResponse(
+  json: unknown,
+  requestText: string
+): { value: unknown; dropped: number } {
   const paths = excludedPaths();
   if (!paths.length || named(requestText)) return { value: json, dropped: 0 };
   let dropped = 0;
